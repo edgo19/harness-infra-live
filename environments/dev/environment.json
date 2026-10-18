@@ -1,0 +1,53 @@
+{
+  "environment": "dev",
+  "deployment_enabled": false,
+  "region": "us-east4",
+  "project_id": "mock-harness-dev",
+  "gke_project_id": "mock-observability-gke",
+  "owner": "mock-platform-team",
+  "cost_center": "mock-cost-center",
+  "state": {
+    "project_id": "mock-enterprise-state",
+    "bucket": "mock-enterprise-tf-state",
+    "prefix": "harness/dev"
+  },
+  "network": {
+    "self_link": "projects/mock-network-host/global/networks/mock-shared-vpc",
+    "private_service_access_ready": false
+  },
+  "storage": {
+    "requests": "mock-harness-dev-requests",
+    "configuration": "mock-harness-dev-configuration",
+    "operations": "mock-harness-dev-operations",
+    "evidence": "mock-harness-dev-evidence",
+    "reports": "mock-harness-dev-reports",
+    "cmek_key_name": null
+  },
+  "database": {
+    "version": "POSTGRES_17",
+    "tier": "db-custom-1-3840",
+    "availability_type": "ZONAL",
+    "disk_size_gb": 20,
+    "disk_autoresize_limit_gb": 200,
+    "pitr_enabled": true,
+    "deletion_protection": true
+  },
+  "models": {
+    "approved_regional_models": []
+  },
+  "shared_budget": {
+    "live_telemetry_enabled": false,
+    "project_id": "mock-harness-prod",
+    "instance_connection_name": "mock-harness-prod:us-east4:harness-prod",
+    "database_name": "query_budget",
+    "validated": false
+  },
+  "secret_bindings": [],
+  "prerequisites": {
+    "enterprise_state_ready": false,
+    "apis_owned_by_platform": false,
+    "pipeline_wif_ready": false,
+    "gke_metadata_ready": false,
+    "database_bootstrap_owner_confirmed": false
+  }
+}

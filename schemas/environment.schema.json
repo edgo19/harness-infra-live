@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["environment", "deployment_enabled", "region", "project_id", "gke_project_id", "owner", "cost_center", "state", "network", "storage", "database", "models", "shared_budget", "secret_bindings", "prerequisites"],
+  "properties": {
+    "environment": {"enum": ["dev", "prod"]},
+    "deployment_enabled": {"type": "boolean"},
+    "region": {"const": "us-east4"},
+    "project_id": {"$ref": "#/$defs/project"},
+    "gke_project_id": {"$ref": "#/$defs/project"},
+    "owner": {"type": "string", "pattern": "^[a-z][a-z0-9_-]{0,62}$"},
+    "cost_center": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"},
+    "state": {
+      "type": "object", "additionalProperties": false,
+      "required": ["project_id", "bucket", "prefix"],
+      "properties": {
+        "project_id": {"$ref": "#/$defs/project"},
+        "bucket": {"$ref": "#/$defs/bucket"},
+        "prefix": {"type": "string", "pattern": "^harness/(dev|prod)$"}
+      }
+    },
+    "network": {
+      "type": "object", "additionalProperties": false,
+      "required": ["self_link", "private_service_access_ready"],
+      "properties": {
+        "self_link": {"type": "string", "pattern": "^projects/[a-z0-9-]+/global/networks/[a-z0-9-]+$"},
+        "private_service_access_ready": {"type": "boolean"}
+      }
+    },
+    "storage": {
+      "type": "object", "additionalProperties": false,
+      "required": ["requests", "configuration", "operations", "evidence", "reports", "cmek_key_name"],
+      "properties": {
+        "requests": {"$ref": "#/$defs/bucket"},
+        "configuration": {"$ref": "#/$defs/bucket"},
+        "operations": {"$ref": "#/$defs/bucket"},
+        "evidence": {"$ref": "#/$defs/bucket"},
+        "reports": {"$ref": "#/$defs/bucket"},
+        "cmek_key_name": {"type": ["string", "null"]}
+      }
+    },
+    "database": {
+      "type": "object", "additionalProperties": false,
+      "required": ["version", "tier", "availability_type", "disk_size_gb", "disk_autoresize_limit_gb", "pitr_enabled", "deletion_protection"],
+      "properties": {
+        "version": {"const": "POSTGRES_17"},
+        "tier": {"enum": ["db-custom-1-3840", "db-custom-2-8192"]},
+        "availability_type": {"enum": ["ZONAL", "REGIONAL"]},
+        "disk_size_gb": {"type": "integer", "minimum": 20, "maximum": 200},
+        "disk_autoresize_limit_gb": {"type": "integer", "minimum": 20, "maximum": 200},
+        "pitr_enabled": {"const": true},
+        "deletion_protection": {"const": true}
+      }
+    },
+    "models": {
+      "type": "object", "additionalProperties": false,
+      "required": ["approved_regional_models"],
+      "properties": {"approved_regional_models": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}}
+    },
+    "shared_budget": {
+      "type": "object", "additionalProperties": false,
+      "required": ["live_telemetry_enabled", "project_id", "instance_connection_name", "database_name", "validated"],
+      "properties": {
+        "live_telemetry_enabled": {"type": "boolean"},
+        "project_id": {"$ref": "#/$defs/project"},
+        "instance_connection_name": {"type": "string", "pattern": "^[a-z0-9-]+:us-east4:[a-z0-9-]+$"},
+        "database_name": {"const": "query_budget"},
+        "validated": {"type": "boolean"}
+      }
+    },
+    "secret_bindings": {
+      "type": "array", "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["secret_id", "secret_project_id", "accessor_member"],
+        "properties": {
+          "secret_id": {"type": "string", "pattern": "^[a-zA-Z0-9_-]+$"},
+          "secret_project_id": {"$ref": "#/$defs/project"},
+          "accessor_member": {"type": "string", "pattern": "^serviceAccount:[a-z0-9-]+@[a-z0-9-]+\\.iam\\.gserviceaccount\\.com$"}
+        }
+      }
+    },
+    "prerequisites": {
+      "type": "object", "additionalProperties": false,
+      "required": ["enterprise_state_ready", "apis_owned_by_platform", "pipeline_wif_ready", "gke_metadata_ready", "database_bootstrap_owner_confirmed"],
+      "properties": {
+        "enterprise_state_ready": {"type": "boolean"},
+        "apis_owned_by_platform": {"type": "boolean"},
+        "pipeline_wif_ready": {"type": "boolean"},
+        "gke_metadata_ready": {"type": "boolean"},
+        "database_bootstrap_owner_confirmed": {"type": "boolean"}
+      }
+    }
+  },
+  "$defs": {
+    "project": {"type": "string", "pattern": "^[a-z][a-z0-9-]{4,28}[a-z0-9]$"},
+    "bucket": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"}
+  }
+}

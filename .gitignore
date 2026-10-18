@@ -6,3 +6,13 @@
 crash.log
 crash.*.log
 
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+*.tfplan.json
+terragrunt-debug.tfvars.json
+terragrunt.rendered.json
+# Commit actual per-unit provider locks when modules can be initialized.
+# Do not ignore .terraform.lock.hcl.
+

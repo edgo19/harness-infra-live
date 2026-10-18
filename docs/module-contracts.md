@@ -1,0 +1,41 @@
+# Terraform module handoff
+
+These are proposed exact interfaces consumed by `_units/*.hcl`. They must be implemented and tested in `harness-terraform-modules` before setting a module commit pin. A Terragrunt render verifies configuration evaluation, not whether an external module declares these inputs. Keep the same input/output names or update both repositories in review. Each module must accept the pinned root `google` provider, avoid duplicating root provider/backend files, and declare a compatible provider requirement.
+
+## Ownership and interfaces
+
+| Module | Live inputs | Required outputs and behavior |
+|---|---|---|
+| `identities` | identity and GKE project IDs, environment, labels, exact `workloads` namespace/KSA map, `project_roles_by_workload` | `workload_configuration`: worker/gateway/dispatcher/telemetry/migration → `ksa_namespace`, `ksa_name`, `gsa_email`, numeric-string `gsa_subject`. Account IDs `harness-<workload>-<env>`. Bind exact KSA members with `roles/iam.workloadIdentityUser`; no KSA, keys, external WIF pool or TokenCreator. Only worker gets reviewed `roles/aiplatform.user` in its hosting project. |
+| `storage` | project/region/environment/labels, five explicit `bucket_names`, optional existing CMEK, workload map, retention and access flags | Exact `bucket_names` map. Separate requests/configuration/operations/evidence/reports buckets, uniform IAM, public access prevention, `force_destroy=false`. No expiration of TF-managed requests, controls or registry objects. Evidence 30d, reports 90d lifecycle proposals; validate enterprise retention before deployment. Version the configuration bucket/current pointer. No locked retention that makes ordinary pointer updates impossible. |
+| `messaging` | project/environment/labels, request and operator buckets/prefixes, dispatcher GSA, notification type, ack/retention/retry/DLQ inputs | `request_subscription_id`, `operations_subscription_id`, `tick_subscription_id`, `tick_topic_id`, `triage_subscription_id`: fully qualified resource IDs. Separate request/operator intake, heartbeat, DLQ and triage. Storage service agent publisher on exact topics before notifications; Pub/Sub service-agent subscriber/DLQ publisher forwarding grants. No public push endpoint, no investigation execution. |
+| `database` | private network, explicit instance/version/Enterprise edition/tier/HA/disk/PITR/deletion protection, IAM auth, runtime database and service accounts, optional shared-budget clients | `instance_connection_name`, `runtime_database`. Dev zonal 1 vCPU/3840 MiB, 20 GiB; prod HA 2 vCPU/8192 MiB, 50 GiB; cap growth at 200 GiB. No public IPv4. Create IAM DB identities and necessary Cloud SQL connection/login IAM for each explicit function. Only prod creates `query_budget`; only prod processes `shared_budget_clients`, including dev/prod telemetry GSAs. No SQL schema/DDL credentials, password output or provider-level SQL bootstrap. |
+| `scheduling` | project/region/environment, same-project tick topic, minute cron, UTC, `paused` | Native Pub/Sub Cloud Scheduler heartbeat only. Preserve Google's Scheduler service agent and documented grants. No arbitrary HTTP target/caller GSA. Initially paused. |
+| `secret-bindings` | list of `secret_id`, `secret_project_id`, exact ESO GSA accessor member | Additive `roles/secretmanager.secretAccessor` on each named **existing** secret only. Empty initial list creates no credentials. Do not manage platform ESO WIF or take secret payload input. Existing corporate modules remain credential producers/rotators; adapters can be added after their real interfaces are supplied. |
+| `schedule-registry` | configuration bucket, structured registry, immutable prefix, pointer name | Canonical content hash → immutable registry revision, then versioned `schedules/current.json` pointer referencing that exact object/generation/hash. Identical content is idempotent. Generation, not revision label, orders imports. No pointer update before immutable object exists. No time/random-triggered publication. |
+| `request-registration` | request bucket, structured `request`, object prefix, `deletion_policy=PREVENT` | Canonicalize/hash; object name derived only from validated immutable request ID. Create-only GCS object with `TaskRequest/v1` content. Prevent overwrite/replacement and deletion; provider constraints and saved-plan policy both required. Proposed outputs `object_name`, `object_generation`, `content_sha256`. No timestamps/random IDs, API calls to runtime, IAM writes or investigation execution. |
+| `control-registration` | operations bucket, structured `control`, prefix, PREVENT | Same immutable mechanics as requests, keyed by operation ID; `ControlRequest/v1`. No request-bucket fallback, impersonation, or model tool. Proposed outputs as above. |
+
+Cloud SQL custom tiers and PostgreSQL 17 must be verified against actual us-east4 enterprise policy/service support. CPU/memory sizes are initial proposals, not SLO guarantees. Module implementations must validate combinations and preserve both Terraform and API deletion protections.
+
+## IAM distribution
+
+Storage grants are additive and resource scoped:
+
+- Dispatcher: read/list approved request/configuration/operations objects. Read/write artifact permissions only as needed for terminal reconciliation/publication.
+- Worker: create/read evidence and reports for the harness workload class; no request/control publishing or backend secrets. Application-level paths enforce run ownership; a shared worker GSA is not a per-run security boundary. Any object update/delete authority requires a demonstrated finalization/cleanup need.
+- Migration: no artifact or backend-secret access by default.
+- Gateway: no backend credentials or broad cloud permissions merely to verify ID tokens.
+- Pipeline publishers: managed by the enterprise identity owner, separately from runtime GSAs. Request publisher writes request objects; operator publisher writes operations; schedule publisher writes approved registry/pointer objects. They need their own remote state read/lock/write access, not infrastructure state access.
+
+Messaging grants dispatcher subscriber on the named subscriptions. DLQ triage readers are separately approved operator identities, not the worker. Managed Storage/Pub/Sub/Scheduler agents receive only their documented grants. Module IAM uses additive members rather than authoritative project bindings/policies.
+
+Database grants dispatcher/worker/migration Cloud SQL client and instance-user IAM plus IAM DB users. SQL bootstrap must separately create/restrict schemas and roles: dispatcher lifecycle/outbox, worker checkpoint/artifact metadata, migration DDL and telemetry budget procedures. Never equate IAM database login with table privileges. A dev telemetry identity accessing production's budget DB must have CONNECT/EXECUTE only on that DB/procedures, no production harness data.
+
+All telemetry clients sharing Loki/Mimir must coordinate through **one** budget DB, initially on production HA SQL. `shared/query-budget-clients.json` is the reviewed list; dev's database receives an empty list. The live-telemetry flag stays false until connectivity, SQL privileges, atomic concurrency, timeout handling and global dev/prod contention are validated. GCP IAM cannot enforce the SQL procedure boundary alone. No module creates Loki/Mimir ingestion rules or modifies query settings.
+
+## Missing external prerequisites
+
+The existing enterprise state bucket, Shared VPC/private service access, API enablement, pipeline federation, GKE metadata server, ESO/PKI/observability, backend permissions and SQL bootstrap owner are external inputs. Do not introduce duplicate owners. Worker regional/model allowlists remain enforced in the runtime; `roles/aiplatform.user` does not itself restrict approved model IDs or regions.
+
+This repository does not yet have a generated `.terraform.lock.hcl` because no real modules can be initialized. Once modules exist, generate and commit per-unit provider locks using the enterprise registry/mirror and required runner platforms; do not fabricate hashes. The exact Google version constraint is present but is not a substitute for provider artifact checksums.

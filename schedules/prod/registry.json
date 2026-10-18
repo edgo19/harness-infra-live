@@ -1,0 +1,5 @@
+{
+  "schema": "ScheduleRegistry/v1",
+  "revision_label": "initial-empty-001",
+  "schedules": []
+}

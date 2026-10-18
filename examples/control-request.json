@@ -1,0 +1,8 @@
+{
+  "schema": "ControlRequest/v1",
+  "operation_id": "example-cancel-001",
+  "action": "cancel_run",
+  "environment": "dev",
+  "target_run_id": "example-run-001",
+  "reason": "Operator-approved cancellation through the separately authorized operations pipeline."
+}

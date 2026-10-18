@@ -1,0 +1,7 @@
+{
+  "repository": "https://github.com/edgo19/harness-terraform-modules.git",
+  "environments": {
+    "dev": {"commit": null},
+    "prod": {"commit": null}
+  }
+}

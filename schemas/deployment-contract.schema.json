@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "environment", "region", "project_id", "gke_project_id", "module_commit", "workloads", "buckets", "messaging", "database", "shared_budget", "approved_regional_models"],
+  "properties": {
+    "schema": {"const": "DeploymentContract/v1"},
+    "environment": {"enum": ["dev", "prod"]},
+    "region": {"const": "us-east4"},
+    "project_id": {"type": "string"},
+    "gke_project_id": {"type": "string"},
+    "module_commit": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+    "workloads": {
+      "type": "object", "additionalProperties": false,
+      "required": ["worker", "gateway", "dispatcher", "telemetry", "migration"],
+      "properties": {
+        "worker": {"$ref": "#/$defs/workload"}, "gateway": {"$ref": "#/$defs/workload"},
+        "dispatcher": {"$ref": "#/$defs/workload"}, "telemetry": {"$ref": "#/$defs/workload"},
+        "migration": {"$ref": "#/$defs/workload"}
+      }
+    },
+    "buckets": {
+      "type": "object", "additionalProperties": false,
+      "required": ["requests", "configuration", "operations", "evidence", "reports"],
+      "properties": {
+        "requests": {"type": "string"}, "configuration": {"type": "string"},
+        "operations": {"type": "string"}, "evidence": {"type": "string"}, "reports": {"type": "string"}
+      }
+    },
+    "messaging": {
+      "type": "object", "additionalProperties": false,
+      "required": ["request_subscription_id", "operations_subscription_id", "tick_subscription_id", "tick_topic_id", "triage_subscription_id"],
+      "properties": {
+        "request_subscription_id": {"$ref": "#/$defs/subscription"},
+        "operations_subscription_id": {"$ref": "#/$defs/subscription"},
+        "tick_subscription_id": {"$ref": "#/$defs/subscription"},
+        "tick_topic_id": {"type": "string", "pattern": "^projects/[^/]+/topics/[^/]+$"},
+        "triage_subscription_id": {"$ref": "#/$defs/subscription"}
+      }
+    },
+    "database": {
+      "type": "object", "additionalProperties": false,
+      "required": ["instance_connection_name", "runtime_database"],
+      "properties": {"instance_connection_name": {"type": "string", "pattern": "^[a-z0-9-]+:us-east4:[a-z0-9-]+$"}, "runtime_database": {"const": "harness"}}
+    },
+    "shared_budget": {
+      "type": "object", "additionalProperties": false,
+      "required": ["instance_connection_name", "database_name", "live_telemetry_enabled"],
+      "properties": {"instance_connection_name": {"type": "string"}, "database_name": {"const": "query_budget"}, "live_telemetry_enabled": {"type": "boolean"}}
+    },
+    "approved_regional_models": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+  },
+  "$defs": {
+    "subscription": {"type": "string", "pattern": "^projects/[^/]+/subscriptions/[^/]+$"},
+    "workload": {
+      "type": "object", "additionalProperties": false,
+      "required": ["ksa_namespace", "ksa_name", "gsa_email", "gsa_subject"],
+      "properties": {
+        "ksa_namespace": {"type": "string", "pattern": "^harness-(control|tools|workers)-(dev|prod)$"},
+        "ksa_name": {"type": "string", "pattern": "^harness-[a-z]+$"},
+        "gsa_email": {"type": "string", "pattern": "^[a-z0-9-]+@[a-z0-9-]+\\.iam\\.gserviceaccount\\.com$"},
+        "gsa_subject": {"type": "string", "pattern": "^[0-9]{16,24}$"}
+      }
+    }
+  }
+}

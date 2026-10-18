@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "operation_id", "action", "environment", "reason"],
+  "properties": {
+    "schema": {"const": "ControlRequest/v1"},
+    "operation_id": {"type": "string", "pattern": "^[a-z][a-z0-9-]{2,79}$"},
+    "action": {"enum": ["cancel_run", "pause_schedule", "resume_schedule"]},
+    "environment": {"enum": ["dev", "prod"]},
+    "reason": {"type": "string", "minLength": 1, "maxLength": 1024},
+    "target_run_id": {"type": "string", "pattern": "^[a-zA-Z0-9-]{3,128}$"},
+    "target_schedule_id": {"type": "string", "pattern": "^[a-z][a-z0-9-]{2,79}$"}
+  },
+  "allOf": [
+    {"if": {"properties": {"action": {"const": "cancel_run"}}}, "then": {"required": ["target_run_id"], "not": {"required": ["target_schedule_id"]}}},
+    {"if": {"properties": {"action": {"enum": ["pause_schedule", "resume_schedule"]}}}, "then": {"required": ["target_schedule_id"], "not": {"required": ["target_run_id"]}}}
+  ]
+}
