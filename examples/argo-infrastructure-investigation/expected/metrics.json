@@ -1,0 +1,16 @@
+{
+  "example_only": true,
+  "source": "argo-azure-cd-infrastructure",
+  "template": "argo-reconcile-p95",
+  "unit": "seconds",
+  "coverage": {
+    "start": "2026-10-21T14:00:00Z",
+    "end": "2026-10-21T14:30:00Z",
+    "step_seconds": 60
+  },
+  "baseline_p95": 8,
+  "current_p95": 36,
+  "series_returned": 1,
+  "points_returned": 31,
+  "scan_completeness": "not-established"
+}

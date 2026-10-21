@@ -1,5 +1,9 @@
 .PHONY: setup check test fmt hcl-check ready
 
+.PHONY: example-check
+example-check:
+	uv run --frozen python examples/argo-infrastructure-investigation/verify.py
+
 setup:
 	uv sync --frozen
 

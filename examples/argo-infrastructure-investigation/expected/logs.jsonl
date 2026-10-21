@@ -1,0 +1,2 @@
+{"example_only": true, "timestamp": "2026-10-21T14:14:00Z", "component": "argocd-application-controller", "message": "Synthetic reconciliation operation timed out; destination details redacted."}
+{"example_only": true, "timestamp": "2026-10-21T14:19:00Z", "component": "argocd-application-controller", "message": "Synthetic retry after reconciliation timeout; application identifier redacted."}

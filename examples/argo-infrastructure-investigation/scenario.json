@@ -1,0 +1,53 @@
+{
+  "example": "argo-infrastructure-investigation",
+  "environment": "dev",
+  "region": "us-east4",
+  "project_id": "mock-harness-dev",
+  "gke_project_id": "mock-observability-gke",
+  "network": "projects/mock-network-host/global/networks/mock-shared-vpc",
+  "state_bucket": "mock-enterprise-tf-state",
+  "state_prefix": "harness/examples/argo-infrastructure-investigation/dev",
+  "bucket_names": {
+    "requests": "mock-harness-dev-requests",
+    "configuration": "mock-harness-dev-configuration",
+    "operations": "mock-harness-dev-operations",
+    "evidence": "mock-harness-dev-evidence",
+    "reports": "mock-harness-dev-reports"
+  },
+  "sql_instance_name": "harness-dev",
+  "sql_private_ip": "10.80.0.10",
+  "shared_budget": {
+    "project_id": "mock-harness-prod",
+    "connection_name": "mock-harness-prod:us-east4:harness-prod",
+    "private_ip": "10.80.0.20",
+    "database": "query_budget",
+    "live_queries_enabled": false
+  },
+  "vertex_model": "REPLACE_WITH_APPROVED_US_EAST4_MODEL",
+  "gateway_audience": "https://harness-gateway.harness-control-dev.svc.cluster.local",
+  "connector_audience": "https://harness-telemetry.harness-tools-dev.svc.cluster.local",
+  "numeric_subjects": {
+    "worker": "100000000000000000001",
+    "gateway": "100000000000000000002"
+  },
+  "source": {
+    "id": "argo-azure-cd-infrastructure",
+    "enabled": false,
+    "hosting_cluster": "mock-aks-argocd-infra",
+    "hosting_namespace": "argocd-azure-cd",
+    "component": "argocd-application-controller"
+  },
+  "loki_url": "http://loki-gateway.observability.svc.cluster.local",
+  "mimir_url": "http://mimir-gateway.observability.svc.cluster.local/prometheus",
+  "images": {
+    "runtime": "mock-jfrog.example.invalid/harness/runtime@sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "gateway": "mock-jfrog.example.invalid/harness/gateway@sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "telemetry": "mock-jfrog.example.invalid/harness/telemetry@sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    "sql-proxy": "mock-jfrog.example.invalid/harness/sql-proxy@sha256:4444444444444444444444444444444444444444444444444444444444444444"
+  },
+  "publisher_members": {
+    "requests": "serviceAccount:harness-requests-publisher@mock-enterprise-ci.iam.gserviceaccount.com",
+    "operations": "serviceAccount:harness-operations-publisher@mock-enterprise-ci.iam.gserviceaccount.com",
+    "configuration": "serviceAccount:harness-configuration-publisher@mock-enterprise-ci.iam.gserviceaccount.com"
+  }
+}

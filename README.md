@@ -1,5 +1,7 @@
 # Harness infrastructure live
 
+**Start with the [complete three-repository example](examples/argo-infrastructure-investigation/README.md)** for a concrete request, resource/input/output tables, relationship diagrams, the deployment/runtime sequence and an illustrative report. It is separate from the production-oriented stacks below.
+
 Reviewed Terragrunt configuration for the generic harness on the existing GCP observability GKE cluster. This repository provisions hosting infrastructure and registers runtime intent. CI/CD never performs an investigation.
 
 **Initial implementation:** dev and prod in `us-east4`, with mock project/network/state settings. Deployment is blocked. The referenced modules in [`harness-terraform-modules`](https://github.com/edgo19/harness-terraform-modules) are not implemented yet, and their commit pins are deliberately `null`. This repository cannot produce a resource plan until those modules and real deployment inputs are available.

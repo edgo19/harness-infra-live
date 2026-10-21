@@ -1,0 +1,41 @@
+{
+  "schema": "ScheduleRegistry/v1",
+  "revision_label": "example-argo-health-001",
+  "schedules": [
+    {
+      "id": "argo-controller-health",
+      "enabled": false,
+      "cron": "*/30 * * * *",
+      "time_zone": "UTC",
+      "missed_run_grace": "10m",
+      "overlap_policy": "forbid",
+      "misfire_policy": "latest-eligible-only",
+      "task_template": {
+        "capability": "pipeline-observability@1.0.0-design",
+        "goal": "Explain increased reconciliation latency in the Azure-CD Argo infrastructure.",
+        "parameters": {
+          "sources": [
+            "argo-azure-cd-infrastructure"
+          ],
+          "time_window": {
+            "lookback": "30m"
+          },
+          "analysis_mode": "targeted"
+        },
+        "requested_limits": {
+          "model_calls": 20,
+          "backend_query_calls": 30,
+          "retrieved_bytes": 20971520,
+          "wall_seconds": 900
+        },
+        "outputs": {
+          "formats": [
+            "json",
+            "markdown"
+          ],
+          "destination": "configured-gcs-reports"
+        }
+      }
+    }
+  ]
+}
